@@ -1,6 +1,7 @@
 """
 Utils for datasets
 """
+import functools
 import numpy as np
 
 import os
@@ -57,57 +58,56 @@ def read_nii_bysitk(input_fid, peel_info = False):
     else:
         return img_np
 
-def get_normalize_op(modality, fids):
+def get_CT_statistics(scan_fids):
+    """
+    As CT are quantitative, get mean and std for CT images for image normalizing
+    As in reality we might not be able to load all images at a time, we would better detach statistics calculation with actual data loading
+    """
+    total_val = 0
+    n_pix = 0
+    for fid in scan_fids:
+        in_img = read_nii_bysitk(fid)
+        total_val += in_img.sum()
+        n_pix += np.prod(in_img.shape)
+        del in_img
+    meanval = total_val / n_pix
+
+    total_var = 0
+    for fid in scan_fids:
+        in_img = read_nii_bysitk(fid)
+        total_var += np.sum((in_img - meanval) ** 2 )
+        del in_img
+    var_all = total_var / n_pix
+
+    global_std = var_all ** 0.5
+
+    return meanval, global_std
+
+def MR_normalize(x_in):
+    return (x_in - x_in.mean()) / x_in.std()
+
+def CT_normalize(x_in, ct_mean, ct_std):
+    """
+    Normalizing CT images, based on global statistics
+    """
+    return (x_in - ct_mean) / ct_std
+
+def get_normalize_op(modality, fids, ct_mean=None, ct_std=None):
     """
     As title
     Args:
         modality:   CT or MR
         fids:       fids for the fold
     """
-
-    def get_CT_statistics(scan_fids):
-        """
-        As CT are quantitative, get mean and std for CT images for image normalizing
-        As in reality we might not be able to load all images at a time, we would better detach statistics calculation with actual data loading
-        """
-        total_val = 0
-        n_pix = 0
-        for fid in scan_fids:
-            in_img = read_nii_bysitk(fid)
-            total_val += in_img.sum()
-            n_pix += np.prod(in_img.shape)
-            del in_img
-        meanval = total_val / n_pix
-
-        total_var = 0
-        for fid in scan_fids:
-            in_img = read_nii_bysitk(fid)
-            total_var += np.sum((in_img - meanval) ** 2 )
-            del in_img
-        var_all = total_var / n_pix
-
-        global_std = var_all ** 0.5
-
-        return meanval, global_std
-
     if modality == 'MR':
-
-        def MR_normalize(x_in):
-            return (x_in - x_in.mean()) / x_in.std()
-
-        return MR_normalize #, {'mean': None, 'std': None} # we do not really need the global statistics for MR
+        return MR_normalize
 
     elif modality == 'CT':
-        ct_mean, ct_std = get_CT_statistics(fids)
+        if ct_mean is None or ct_std is None:
+            ct_mean, ct_std = get_CT_statistics(fids)
         # debug
-        print(f'###### DEBUG_DATASET CT_STATS NORMALIZED MEAN {ct_mean / 255} STD {ct_std / 255} ######')
+        print(f'###### DEBUG_DATASET CT_STATS NORMALIZED MEAN {ct_mean} STD {ct_std} ######')
 
-        def CT_normalize(x_in):
-            """
-            Normalizing CT images, based on global statistics
-            """
-            return (x_in - ct_mean) / ct_std
-
-        return CT_normalize #, {'mean': ct_mean, 'std': ct_std}
+        return functools.partial(CT_normalize, ct_mean=ct_mean, ct_std=ct_std)
 
 
