@@ -12,13 +12,25 @@ NWORKER=4
 ALL_EV=( 0) # 5-fold cross validation (0, 1, 2, 3, 4)
 ALL_SCALE=( "MIDDLE") # config of pseudolabels
 
-### Use L/R kidney as testing classes
-LABEL_SETS=0 
-EXCLU='[2,3]' # setting 2: excluding kidneies in training set to test generalization capability even though they are unlabeled. Use [] for setting 1 by Roy et al.
-
-### Use Liver and spleen as testing classes
-# LABEL_SETS=1 
-# EXCLU='[1,4]' 
+### Handle LABEL_SETS parameter
+if [ $# -eq 0 ]; then
+    echo "No label set provided, using default (0: L/R kidney as testing classes)"
+    LABEL_SETS=0
+    EXCLU='[2,3]'
+else
+    LABEL_SETS=$1
+    if [ $LABEL_SETS -eq 0 ]; then
+        echo "Using L/R kidney as testing classes"
+        EXCLU='[2,3]'
+    elif [ $LABEL_SETS -eq 1 ]; then
+        echo "Using Liver and spleen as testing classes"
+        EXCLU='[1,4]'
+    else
+        echo "Invalid LABEL_SETS value. Using default (0: L/R kidney as testing classes)"
+        LABEL_SETS=0
+        EXCLU='[2,3]'
+    fi
+fi
 
 ###### Training configs ######
 NSTEP=100100
@@ -31,6 +43,8 @@ SEED='1234'
 ###### Validation configs ######
 SUPP_ID='[4]' #  # using the additionally loaded scan as support
 
+echo ===================================
+echo "Using LABEL_SETS=$LABEL_SETS with EXCLU=$EXCLU"
 echo ===================================
 
 for EVAL_FOLD in "${ALL_EV[@]}"
