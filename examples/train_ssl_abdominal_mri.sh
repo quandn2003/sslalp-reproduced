@@ -57,7 +57,7 @@ do
 
     if [ ! -d $LOGDIR ]
     then
-        mkdir $LOGDIR
+        mkdir -p $LOGDIR
     fi
 
     python3 training.py with \

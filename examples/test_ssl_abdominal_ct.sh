@@ -43,7 +43,7 @@ do
 
     if [ ! -d $LOGDIR ]
     then
-        mkdir $LOGDIR
+        mkdir -p $LOGDIR
     fi
 
     RELOAD_PATH='please feed the path to the trained weights here' # path to the reloaded model
