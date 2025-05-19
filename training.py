@@ -175,5 +175,8 @@ def main(_run, _config, _log):
                     print(f'###### New dataset with {len(trainloader.dataset)} slices has been loaded ######')
 
             if (i_iter - 2) > _config['n_steps']:
+                _log.info('###### Saving final model ######')
+                torch.save(model.state_dict(),
+                          os.path.join(f'{_run.observers[0].dir}/snapshots', f'final_model.pth'))
                 return 1 # finish up
 
