@@ -106,15 +106,15 @@ def cfg():
 
     path = {
         'log_dir': './runs',
-        'SABS':{'data_dir': "./data/SABS/sabs_CT_normalized"
+        'SABS':{'data_dir': "/kaggle/input/preprocessed-data/sabs_CT_normalized/sabs_CT_normalized"
             },
         'C0':{'data_dir': "feed your dataset path here"
             },
-        'CHAOST2':{'data_dir': "./data/CHAOST2/chaos_MR_T2_normalized/"
+        'CHAOST2':{'data_dir': "/kaggle/input/preprocessed-data/chaos_MR_T2_normalized/chaos_MR_T2_normalized"
             },
-        'SABS_Superpix':{'data_dir': "./data/SABS/sabs_CT_normalized"},
+        'SABS_Superpix':{'data_dir': "/kaggle/input/preprocessed-data/sabs_CT_normalized/sabs_CT_normalized"},
         'C0_Superpix':{'data_dir': "feed your dataset path here"},
-        'CHAOST2_Superpix':{'data_dir': "./data/CHAOST2/chaos_MR_T2_normalized/"},
+        'CHAOST2_Superpix':{'data_dir': "/kaggle/input/preprocessed-data/chaos_MR_T2_normalized/chaos_MR_T2_normalized"},
         }
 
 
